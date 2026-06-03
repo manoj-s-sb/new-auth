@@ -327,6 +327,33 @@
     height: 18px;
   }
 
+  .btn-social:disabled,
+  .btn-social.loading {
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none !important;
+    background: var(--input-bg);
+    border-color: var(--input-border);
+  }
+  .btn-social.loading > svg,
+  .btn-social.loading > span.btn-social-label {
+    visibility: hidden;
+  }
+  .btn-social.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border: 2px solid rgba(0, 0, 0, 0.15);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  .btn-social { position: relative; }
+
   .divider {
     display: flex;
     align-items: center;
@@ -561,6 +588,145 @@
   body.plans-mode { align-items: flex-start; padding: 32px 20px; }
   body.plans-mode .layout { display: none; }
 
+  /* ─── DASHBOARD (shown after Stripe confirm) ─── */
+  body.dashboard-mode { align-items: flex-start; padding: 32px 20px; }
+  body.dashboard-mode .layout { display: none; }
+  body.dashboard-mode #plans-screen { display: none; }
+
+  #dashboard-screen {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    z-index: 1;
+    position: relative;
+    animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .db-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .db-header h2 { font-size: 28px; font-weight: 600; letter-spacing: -0.4px; }
+
+  .db-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 26px 28px;
+    box-shadow: 0 12px 30px -10px rgba(0,0,0,0.12);
+    margin-bottom: 18px;
+  }
+  .db-card-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+  }
+  .db-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border-color);
+    font-size: 14px;
+  }
+  .db-row:last-child { border-bottom: none; }
+  .db-row-label { color: var(--text-secondary); }
+  .db-row-value { color: var(--text-primary); font-weight: 500; }
+  .db-row-value.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; word-break: break-all; text-align: right; max-width: 60%; }
+
+  .db-success-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: rgba(16,185,129,0.12);
+    border: 1px solid rgba(16,185,129,0.3);
+    color: #047857;
+    border-radius: 14px;
+    font-weight: 500;
+    margin-bottom: 18px;
+  }
+  .db-success-banner svg { width: 22px; height: 22px; flex: 0 0 auto; }
+
+  .db-cta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 22px;
+    background: linear-gradient(135deg, rgba(79,70,229,0.08), rgba(56,189,248,0.08));
+    border: 1px solid rgba(79,70,229,0.25);
+    border-radius: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .db-cta-text { display: flex; flex-direction: column; gap: 3px; }
+  .db-cta-text strong { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+  .db-cta-text span { font-size: 13px; color: var(--text-secondary); }
+  .db-cta-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  .db-cta-btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 14px rgba(79,70,229,0.3); }
+
+  .db-amount-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: 14px;
+    margin-top: 10px;
+    border-top: 1px solid var(--border-color);
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .db-amount-row .db-row-value { font-size: 22px; color: var(--accent); }
+
+  .db-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .db-status-pill.confirmed { background: rgba(16,185,129,0.15); color: #047857; }
+  .db-status-pill.awaiting { background: rgba(245,158,11,0.15); color: #92400e; }
+
+  .db-logout-btn {
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    color: var(--error);
+    border: 1px solid var(--error);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .db-logout-btn:hover { background: var(--error); color: white; }
+
   #plans-screen {
     width: 100%;
     max-width: 1180px;
@@ -776,11 +942,11 @@
         <div class="social-grid">
           <button type="button" class="btn-social" data-provider="google">
             <svg viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Google
+            <span class="btn-social-label">Google</span>
           </button>
           <button type="button" class="btn-social" data-provider="apple">
             <svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.26-.74 3.58-.79 1.56-.05 2.82.68 3.55 1.73-3.03 1.83-2.5 5.54.49 6.82-1.04 2.65-2.53 5.4-3.7 4.41zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.37-1.89 4.31-3.74 4.25z"/></svg>
-            Apple
+            <span class="btn-social-label">Apple</span>
           </button>
         </div>
       </section>
@@ -1027,7 +1193,7 @@
       <section id="view-membership" class="view" hidden>
         <button type="button" class="back-btn" id="mk-back-to-signin">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Back to sign in
+          Back
         </button>
 
         <h2 id="mk-title">One last step</h2>
@@ -1146,10 +1312,114 @@
   </div>
 </section>
 
+<!-- ─── DASHBOARD SCREEN (shown after Stripe confirms a subscription) ─── -->
+<section id="dashboard-screen" hidden>
+  <div class="db-header">
+    <h2>Subscription</h2>
+  </div>
+
+  <div class="db-success-banner" id="db-banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+    <span id="db-banner-text">Payment confirmed.</span>
+  </div>
+
+  <!-- Shown only when membership.hasMembershipKey === false -->
+  <div class="db-cta" id="db-cta-membership" hidden>
+    <div class="db-cta-text">
+      <strong>Link your membership key</strong>
+      <span>Already a member? Add your 6-digit key to link this account.</span>
+    </div>
+    <button type="button" class="db-cta-btn" id="db-add-membership-btn">Add membership</button>
+  </div>
+
+  <div class="db-card">
+    <div class="db-card-title">Account</div>
+    <div class="db-row" id="db-name-row">
+      <span class="db-row-label">Name</span>
+      <span class="db-row-value" id="db-name">—</span>
+    </div>
+    <div class="db-row">
+      <span class="db-row-label">Email</span>
+      <span class="db-row-value" id="db-email">—</span>
+    </div>
+    <div class="db-row" id="db-facility-row" hidden>
+      <span class="db-row-label">Facility</span>
+      <span class="db-row-value" id="db-facility">—</span>
+    </div>
+    <div class="db-row">
+      <span class="db-row-label">Device</span>
+      <span class="db-row-value mono" id="db-device">—</span>
+    </div>
+  </div>
+
+  <div class="db-card">
+    <div class="db-card-title">Subscription</div>
+    <div class="db-row">
+      <span class="db-row-label">Plan</span>
+      <span class="db-row-value" id="db-plan">—</span>
+    </div>
+    <div class="db-row">
+      <span class="db-row-label">Billing cycle</span>
+      <span class="db-row-value" id="db-cycle">—</span>
+    </div>
+    <div class="db-row">
+      <span class="db-row-label">Status</span>
+      <span class="db-row-value" id="db-status">—</span>
+    </div>
+    <div class="db-row" id="db-renews-row" hidden>
+      <span class="db-row-label">Renews on</span>
+      <span class="db-row-value" id="db-renews">—</span>
+    </div>
+    <div class="db-row" id="db-recurring-row" hidden>
+      <span class="db-row-label">Recurring charge</span>
+      <span class="db-row-value" id="db-recurring">—</span>
+    </div>
+    <div class="db-row" id="db-membership-row" hidden>
+      <span class="db-row-label">Membership key linked</span>
+      <span class="db-row-value" id="db-membership">—</span>
+    </div>
+    <div class="db-row" id="db-induction-row">
+      <span class="db-row-label">Awaiting induction</span>
+      <span class="db-row-value" id="db-induction">—</span>
+    </div>
+  </div>
+
+  <div class="db-card" id="db-payment-card" hidden>
+    <div class="db-card-title">Payment</div>
+    <div class="db-row">
+      <span class="db-row-label">Transaction ID</span>
+      <span class="db-row-value mono" id="db-txn">—</span>
+    </div>
+    <div class="db-row">
+      <span class="db-row-label">Subscription</span>
+      <span class="db-row-value" id="db-bd-sub">—</span>
+    </div>
+    <div class="db-row">
+      <span class="db-row-label">Registration fee</span>
+      <span class="db-row-value" id="db-bd-reg">—</span>
+    </div>
+    <div class="db-row">
+      <span class="db-row-label">Tax</span>
+      <span class="db-row-value" id="db-bd-tax">—</span>
+    </div>
+    <div class="db-row">
+      <span class="db-row-label">Creditable amount</span>
+      <span class="db-row-value" id="db-credit">—</span>
+    </div>
+    <div class="db-amount-row">
+      <span class="db-row-label">Total paid</span>
+      <span class="db-row-value" id="db-amount">—</span>
+    </div>
+  </div>
+
+  <button type="button" class="db-logout-btn" id="db-logout-btn">Log out</button>
+</section>
+
 <script>
   // ─── CONFIG ───────────────────────────────────────
   const BASE_URL = 'https://century-authentication-func-uat-fjg7afhcgqg0e3g7.southindia-01.azurewebsites.net';
   const AUTH_ENDPOINT = `${BASE_URL}/auth`;
+  const REQUEST_ID = '7c4d2e1a-9b3f-4a55-9e0d-1f8a2b3c4d5e';
 
   // ─── STATE ────────────────────────────────────────
   const state = {
@@ -1193,7 +1463,11 @@
   }
 
   async function callAuth(payload, { bearer } = {}){
-    const headers = { 'Content-Type':'application/json', 'Accept':'application/json' };
+    const headers = {
+      'Content-Type':'application/json',
+      'Accept':'application/json',
+      'X-Request-Id': REQUEST_ID,
+    };
     if(bearer) headers['Authorization'] = `Bearer ${bearer}`;
     const res = await fetch(AUTH_ENDPOINT, {
       method:'POST',
@@ -1363,13 +1637,20 @@
       saveSession(res && res.data);
       console.log('[signin] success', res.data);
       const userStatus = res && res.data && res.data.status;
-      if(userStatus === 0){
-        // Account exists but isn't fully activated — require membership key.
-        showNotice(notice, 'Almost done — please enter your membership key.', 'success');
-        setTimeout(() => showMembershipView(), 500);
+      const profile = res && res.data && res.data.profile;
+      console.log('[signin] routing', { userStatus, hasProfile: !!profile });
+      // The user is signed in either way — go straight to the dashboard.
+      // The membership CTA in the dashboard handles the "no key linked"
+      // nudge for status 0 + hasMembershipKey === false.
+      if(userStatus === 0 || userStatus === 1){
+        showNotice(notice, res.message || 'Signed in successfully.', 'success');
+        setTimeout(() => {
+          try { showDashboardFromProfile(profile); }
+          catch(e){ console.error('[dashboard] render failed', e); alert('Dashboard render failed: ' + (e.message || e)); }
+        }, 500);
       } else {
         showNotice(notice, res.message || 'Signed in successfully.', 'success');
-        // TODO: redirect to the authenticated area when ready
+        console.warn('[signin] unknown status, staying on auth card', userStatus);
       }
     } catch(err){
       showNotice(notice, err.message || 'Unable to sign in.');
@@ -1582,6 +1863,9 @@
         password: pwEl.value,
         passwordConfirmation: pw2El.value,
         captchaToken:'test-captcha',
+        facilityCode: 'HOU01',
+        deviceType: detectDeviceType(),
+        deviceInfo: buildDeviceInfo(),
       });
       showNotice(notice, data.message || 'Account created. Please sign in.', 'success');
       setTimeout(() => {
@@ -1607,7 +1891,7 @@
   // back with ?code=…&state=… → we POST code + verifier + redirect_uri +
   // nonce to /auth. The backend exchanges with Google server-side and
   // verifies the id_token. No browser-side origin allow-listing needed.
-  const GOOGLE_CLIENT_ID = '466163600145-i7tqtn44a02hls284vj9svi5snl2cuna.apps.googleusercontent.com';
+  const GOOGLE_CLIENT_ID = '366935501779-vbnt7gqt426ptmj0388inregjgrusgn0.apps.googleusercontent.com';
   const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
   const GOOGLE_SESSION_KEY = 'google_oauth_session';
   let googleConfig = null;
@@ -1639,7 +1923,7 @@
     try {
       const res = await fetch(`${BASE_URL}/auth/config?provider=google`, {
         method:'GET',
-        headers:{'Accept':'application/json'},
+        headers:{'Accept':'application/json','X-Request-Id': REQUEST_ID},
       });
       const body = await res.json().catch(() => null);
       if(res.ok && body && body.status === 'success' && body.data && body.data.nonce){
@@ -1685,6 +1969,7 @@
     } catch(err){
       console.error('[google] redirect failed', err);
       showNotice(noticeEl, err.message || 'Google sign-in is unavailable.');
+      setSocialLoading(null, false);
     }
   }
 
@@ -1718,6 +2003,10 @@
       return;
     }
 
+    // Show the Google button as loading while we exchange the code.
+    const googleBtn = document.querySelector('.btn-social[data-provider="google"]');
+    if(googleBtn) setSocialLoading(googleBtn, true);
+
     try {
       const res = await callAuth({
         action: 'googleSignin',        // TODO: confirm with backend
@@ -1725,15 +2014,28 @@
         code,
         codeVerifier: saved.codeVerifier,
         redirectUri: saved.redirectUri,
-        nonce: saved.nonce,deviceType: detectDeviceType(),
+        nonce: saved.nonce,
+        deviceType: detectDeviceType(),
         deviceInfo: buildDeviceInfo(),
       });
       saveSession(res && res.data);
       showNotice(noticeEl, res.message || 'Signed in with Google.', 'success');
       console.log('[google] success', res && res.data);
-      // TODO: branch on res.data.status here (membership / plans) like email signin
+      // Same routing as the email sign-in: status 0 or 1 → dashboard.
+      const userStatus = res && res.data && res.data.status;
+      const profile = res && res.data && res.data.profile;
+      if(userStatus === 0 || userStatus === 1){
+        setTimeout(() => {
+          try { showDashboardFromProfile(profile); }
+          catch(e){ console.error('[dashboard] render failed', e); alert('Dashboard render failed: ' + (e.message || e)); }
+        }, 500);
+      } else {
+        console.warn('[google] unknown status', userStatus);
+      }
     } catch(err){
       showNotice(noticeEl, err.message || 'Google sign-in failed.');
+    } finally {
+      setSocialLoading(null, false);
     }
   }
   window.addEventListener('DOMContentLoaded', _completeGoogleSignIn);
@@ -1747,7 +2049,7 @@
     if(appleConfig) return appleConfig;
     const res = await fetch(`${BASE_URL}/auth/config?provider=apple`, {
       method: 'GET',
-      headers: { 'Accept': 'application/json' },
+      headers: { 'Accept': 'application/json', 'X-Request-Id': REQUEST_ID },
     });
     const body = await res.json().catch(() => null);
     if(!res.ok || !body || body.status !== 'success' || !body.data){
@@ -1805,7 +2107,16 @@
       if(typeof saveSession === 'function') saveSession(data && data.data);
       showNotice(noticeEl, data.message || 'Signed in with Apple.', 'success');
       console.log('[apple] success', data && data.data);
-      // TODO: redirect to authenticated area
+      const userStatus = data && data.data && data.data.status;
+      const profile = data && data.data && data.data.profile;
+      if(userStatus === 0 || userStatus === 1){
+        setTimeout(() => {
+          try { showDashboardFromProfile(profile); }
+          catch(e){ console.error('[dashboard] render failed', e); alert('Dashboard render failed: ' + (e.message || e)); }
+        }, 500);
+      } else {
+        console.warn('[apple] unknown status', userStatus);
+      }
     } catch(err){
       showNotice(noticeEl, err.message || 'Apple sign-in failed.');
     }
@@ -1827,14 +2138,35 @@
     }
   }
 
+  // ─── SOCIAL BUTTON LOADING STATE ──────────────────
+  function setSocialLoading(clickedBtn, isLoading){
+    $$('.btn-social').forEach(b => {
+      if(isLoading){
+        if(b === clickedBtn) b.classList.add('loading');
+        b.disabled = true;
+      } else {
+        b.classList.remove('loading');
+        b.disabled = false;
+      }
+    });
+  }
+
   // ─── SOCIAL BUTTON WIRING ─────────────────────────
   $$('.btn-social').forEach(b => {
-    b.addEventListener('click', () => {
+    b.addEventListener('click', async () => {
+      if(b.disabled || b.classList.contains('loading')) return;
       const provider = b.dataset.provider;
-      if(provider === 'google'){
-        triggerGoogle();
-      } else if(provider === 'apple'){
-        triggerApple();
+      setSocialLoading(b, true);
+      try {
+        if(provider === 'google'){
+          await triggerGoogle();
+          // Google does a full-page redirect — spinner stays until then.
+        } else if(provider === 'apple'){
+          await triggerApple();
+          setSocialLoading(null, false);
+        }
+      } catch {
+        setSocialLoading(null, false);
       }
     });
   });
@@ -2184,9 +2516,19 @@
 
   function exitMembershipView(){
     clearInterval(mkState.timer);
+    $('#view-membership').setAttribute('hidden',''); $('#view-membership').classList.remove('active');
+    // If we have a cached profile (user is signed in), return to the
+    // dashboard. Otherwise drop back to the sign-in tab.
+    const cachedProfile = localStorage.getItem('century.profile');
+    const token = localStorage.getItem('century.access_token');
+    if(token && cachedProfile){
+      try {
+        showDashboardFromProfile(JSON.parse(cachedProfile));
+        return;
+      } catch { /* fall through to signin */ }
+    }
     $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode === 'signin'));
     state.mode = 'signin';
-    $('#view-membership').setAttribute('hidden',''); $('#view-membership').classList.remove('active');
     $('#view-signin').removeAttribute('hidden'); $('#view-signin').classList.add('active');
     positionTabIndicator();
   }
@@ -2355,7 +2697,11 @@
     const url = `${PLANS_BASE}/subscription/list?facilityCode=${encodeURIComponent(FACILITY_CODE)}&view=desktop`;
     const res = await fetch(url, {
       method: 'GET',
-      headers: { 'Accept': 'application/json', 'x-functions-key': PLANS_FUNCTION_KEY },
+      headers: {
+        'Accept': 'application/json',
+        'x-functions-key': PLANS_FUNCTION_KEY,
+        'X-Request-Id': REQUEST_ID,
+      },
     });
     const body = await res.json().catch(() => null);
     if(!res.ok || !body || body.status !== 'success' || !body.data){
@@ -2457,14 +2803,24 @@
 
   // Map UI cycle → backend value. Adjust if the API expects different casing.
   const BILLING_CYCLE_MAP = {
-    fortnightly: 'FORTNIGHTLY',
-    annual: 'ANNUAL',
+    fortnightly: 'fortnightly',
+    annual: 'annual',
   };
 
-  function defaultMemberCount(plan){
-    // Family plan bundles 2 additional members alongside the primary user.
-    if(plan && plan.id === 'family') return 3;
-    return 1;
+  function askFamilyMembers(plan){
+    // Prompts the buyer for how many additional family members to add.
+    // Backend treats this as the TOTAL extra members on top of the primary.
+    const raw = window.prompt(
+      `How many additional family members for the "${plan.name}" plan?\n(Enter a number, e.g. 2)`,
+      '2'
+    );
+    if(raw === null) return null; // user cancelled
+    const n = parseInt(raw, 10);
+    if(isNaN(n) || n < 0){
+      alert('Please enter a valid non-negative number.');
+      return null;
+    }
+    return n;
   }
 
   async function handleBuy(planId, btn){
@@ -2473,7 +2829,15 @@
 
     const cycle = plansState.cycle;
     const mappedBillingCycle = BILLING_CYCLE_MAP[cycle] || cycle;
-    const memberCount = defaultMemberCount(plan);
+
+    // Only the Family plan needs a member count; other plans send 0.
+    let memberCount = 0;
+    if(plan.id === 'family'){
+      const asked = askFamilyMembers(plan);
+      if(asked === null) return; // cancelled or invalid input
+      memberCount = asked;
+    }
+
     const token = localStorage.getItem('century.access_token');
 
     if(!token){
@@ -2507,6 +2871,7 @@
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
           'x-functions-key': PLANS_FUNCTION_KEY,
+          'X-Request-Id': REQUEST_ID,
         },
         body: JSON.stringify(payload),
       });
@@ -2531,6 +2896,292 @@
       if(btn){ btn.classList.remove('loading'); btn.disabled = false; btn.innerHTML = originalLabel; }
       allBtns.forEach(b => { if(b !== btn) b.disabled = false; });
     }
+  }
+
+  // ─── POST-STRIPE CONFIRM ──────────────────────────
+  // Stripe redirects back here with ?sessionId=… (or ?session_id=…) appended
+  // to the success URL. On page load we POST that sessionId to
+  // /subscription/confirm. On success we hide the auth/plans card and show
+  // the dashboard with account + subscription + payment details.
+  async function _completeStripeCheckout(){
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('sessionId') || params.get('session_id');
+    if(!sessionId) return;
+
+    // Strip the param so a reload doesn't re-confirm the same session.
+    params.delete('sessionId');
+    params.delete('session_id');
+    const cleanSearch = params.toString();
+    history.replaceState(null, '',
+      window.location.pathname + (cleanSearch ? `?${cleanSearch}` : ''));
+
+    const token = localStorage.getItem('century.access_token');
+    if(!token){
+      alert('Subscription confirm: your session expired — please sign in again to confirm.');
+      return;
+    }
+
+    console.log('[confirm] sessionId =', sessionId);
+    try {
+      const res = await fetch(`${CHECKOUT_BASE}/subscription/confirm`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'x-functions-key': PLANS_FUNCTION_KEY,
+          'X-Request-Id': REQUEST_ID,
+        },
+        body: JSON.stringify({ sessionId }),
+      });
+      const body = await res.json().catch(() => null);
+      // /subscription/confirm returns `success: true` rather than the
+      // status:'success' envelope used by /auth, so accept either shape.
+      const ok = res.ok && body && (body.success === true || body.status === 'success');
+      if(!ok){
+        throw new Error((body && body.message) || `Confirm failed (${res.status}).`);
+      }
+      console.log('[confirm] success', body);
+      showDashboard(body);
+    } catch(err){
+      console.error('[confirm] error', err);
+      alert(err.message || 'Could not confirm the subscription.');
+    }
+  }
+  window.addEventListener('DOMContentLoaded', _completeStripeCheckout);
+
+  // ─── DASHBOARD ────────────────────────────────────
+  const PLAN_LABEL = { premium: 'Premium', standard: 'Standard', family: 'Family' };
+  const CYCLE_LABEL = { fortnightly: 'Every 2 weeks', annual: 'Annually' };
+
+  function fmtMoney(n){
+    if(n == null || isNaN(n)) return '—';
+    return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function _openDashboardShell(){
+    document.body.classList.remove('plans-mode');
+    document.body.classList.add('dashboard-mode');
+    const ps = $('#plans-screen'); if(ps) ps.setAttribute('hidden','');
+    $('#dashboard-screen').removeAttribute('hidden');
+  }
+
+  // Set a row's visibility + value in one call.
+  function _setRow(rowId, valueId, value){
+    const row = $(rowId);
+    const valEl = $(valueId);
+    if(value && String(value).trim()){
+      if(row) row.removeAttribute('hidden');
+      valEl.textContent = value;
+    } else {
+      if(row) row.setAttribute('hidden','');
+      valEl.textContent = '—';
+    }
+  }
+
+  function _fmtDate(iso){
+    if(!iso) return '';
+    const d = new Date(iso);
+    if(isNaN(d)) return iso;
+    return d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+  }
+
+  // ── Dashboard from POST-STRIPE /subscription/confirm response ──
+  function showDashboard(data){
+    _openDashboardShell();
+
+    // Account (no profile in this response — use cached email/device)
+    const email = localStorage.getItem('century.email') ||
+                  ($('#si-email') && $('#si-email').value.trim()) ||
+                  state.email || '';
+    const deviceId = localStorage.getItem('century.deviceId') || '';
+    _setRow('#db-name-row', '#db-name', localStorage.getItem('century.firstName') || '');
+    _setRow(null,           '#db-email',   email || '—');
+    _setRow('#db-facility-row', '#db-facility', '');
+    _setRow(null,           '#db-device',  deviceId || '—');
+
+    // Subscription
+    const planCode = data.subscriptionCode || '';
+    const cycle = data.billingCycle || '';
+    $('#db-plan').textContent = PLAN_LABEL[planCode] || planCode || '—';
+    $('#db-cycle').textContent = CYCLE_LABEL[cycle] || cycle || '—';
+
+    const statusEl = $('#db-status');
+    statusEl.innerHTML = data.paymentConfirmed
+      ? '<span class="db-status-pill confirmed">Confirmed</span>'
+      : '<span class="db-status-pill awaiting">Pending</span>';
+
+    $('#db-renews-row').setAttribute('hidden','');
+    $('#db-recurring-row').setAttribute('hidden','');
+    $('#db-membership-row').setAttribute('hidden','');
+
+    const inductionEl = $('#db-induction');
+    $('#db-induction-row').removeAttribute('hidden');
+    inductionEl.innerHTML = data.awaitingInduction
+      ? '<span class="db-status-pill awaiting">Awaiting induction</span>'
+      : 'No';
+
+    // Banner copy
+    $('#db-banner-text').textContent = data.alreadyProcessed
+      ? 'This payment was already confirmed.'
+      : 'Payment confirmed. Welcome aboard.';
+
+    // Payment card
+    $('#db-payment-card').removeAttribute('hidden');
+    $('#db-txn').textContent = data.prepaidTransactionId || '—';
+    const bd = data.breakdown || {};
+    $('#db-bd-sub').textContent = fmtMoney(bd.subscription);
+    $('#db-bd-reg').textContent = fmtMoney(bd.registrationFee);
+    $('#db-bd-tax').textContent = fmtMoney(bd.tax);
+    $('#db-credit').textContent = fmtMoney(data.creditableAmount);
+    $('#db-amount').textContent = fmtMoney(data.amount);
+  }
+
+  // ── Dashboard from POST-SIGNIN /auth response when data.status === 1 ──
+  // Uses data.profile.personalInfo / subscriptionDetails / membership /
+  // facilityInfo. No payment breakdown is available here, so that card is
+  // hidden.
+  function showDashboardFromProfile(profile){
+    _openDashboardShell();
+    profile = profile || {};
+    const pi = profile.personalInfo || {};
+    const sd = profile.subscriptionDetails || {};
+    const mb = profile.membership || {};
+    const fi = profile.facilityInfo || {};
+
+    // Cache profile bits for later screens + page refresh restore.
+    if(pi.firstName) localStorage.setItem('century.firstName', pi.firstName);
+    if(pi.email)     localStorage.setItem('century.email', pi.email);
+    try {
+      localStorage.setItem('century.profile', JSON.stringify(profile));
+    } catch { /* storage full / disabled */ }
+
+    // Account
+    const fullName = [pi.firstName, pi.lastName].filter(Boolean).join(' ').trim();
+    _setRow('#db-name-row', '#db-name', fullName);
+    _setRow(null,           '#db-email', pi.email || '—');
+    const facilityName = fi.name
+      ? (fi.city ? `${fi.name} — ${fi.city}` : fi.name)
+      : '';
+    _setRow('#db-facility-row', '#db-facility', facilityName);
+    _setRow(null, '#db-device', localStorage.getItem('century.deviceId') || '—');
+
+    // Subscription
+    const planCode = sd.currentSubscriptionCode || sd.currentSubscriptionPlan || '';
+    const cycle = sd.currentBillingCycle || '';
+    $('#db-plan').textContent = PLAN_LABEL[planCode] || planCode || '—';
+    $('#db-cycle').textContent = CYCLE_LABEL[cycle] || cycle || '—';
+
+    const subStatus = (sd.subscriptionStatus || '').toLowerCase();
+    const statusEl = $('#db-status');
+    if(subStatus === 'active'){
+      statusEl.innerHTML = '<span class="db-status-pill confirmed">Active</span>';
+    } else if(subStatus){
+      statusEl.innerHTML = `<span class="db-status-pill awaiting">${subStatus.charAt(0).toUpperCase() + subStatus.slice(1)}</span>`;
+    } else {
+      statusEl.textContent = '—';
+    }
+
+    _setRow('#db-renews-row', '#db-renews', _fmtDate(sd.subscriptionRenewsOn));
+    const cur = (sd.currency || 'usd').toUpperCase();
+    const recurringText = sd.totalAmount != null
+      ? `${fmtMoney(sd.totalAmount)} ${cur} (incl. ${fmtMoney(sd.taxAmount)} tax)`
+      : '';
+    _setRow('#db-recurring-row', '#db-recurring', recurringText);
+
+    _setRow('#db-membership-row', '#db-membership', mb.hasMembershipKey ? 'Yes' : 'No');
+
+    const inductionEl = $('#db-induction');
+    $('#db-induction-row').removeAttribute('hidden');
+    inductionEl.innerHTML = pi.isInductionCompleted
+      ? 'Completed'
+      : '<span class="db-status-pill awaiting">Awaiting induction</span>';
+
+    // Banner: friendly welcome.
+    $('#db-banner-text').textContent = pi.firstName
+      ? `Welcome back, ${pi.firstName}.`
+      : 'Welcome back.';
+
+    // Show the "Add membership" CTA only when no key is linked.
+    const cta = $('#db-cta-membership');
+    if(cta){
+      if(mb.hasMembershipKey){
+        cta.setAttribute('hidden','');
+      } else {
+        cta.removeAttribute('hidden');
+      }
+    }
+
+    // Hide payment card — no transaction context after a plain sign-in.
+    $('#db-payment-card').setAttribute('hidden','');
+  }
+
+  // "Add membership" CTA on the dashboard → opens the existing key flow.
+  $('#db-add-membership-btn').addEventListener('click', () => {
+    document.body.classList.remove('dashboard-mode');
+    $('#dashboard-screen').setAttribute('hidden','');
+    showMembershipView();
+  });
+
+  function hideDashboard(){
+    document.body.classList.remove('dashboard-mode');
+    $('#dashboard-screen').setAttribute('hidden','');
+  }
+
+  async function fullLogout(btn){
+    const token = localStorage.getItem('century.access_token');
+
+    // Optimistically disable the logout button while the call is in flight,
+    // but ALWAYS clear local state afterwards even if the server call fails.
+    const target = btn && btn.classList ? btn : null;
+    if(target){ target.disabled = true; }
+    const originalLabel = target ? target.textContent : '';
+    if(target) target.textContent = 'Signing out…';
+
+    if(token){
+      try {
+        const res = await callAuth({ action: 'signout' }, { bearer: token });
+        console.log('[signout] success', res);
+      } catch(err){
+        // Network error / already-revoked / expired — log but proceed.
+        console.warn('[signout] server call failed; clearing locally anyway', err);
+      }
+    }
+
+    // Wipe every client-side trace.
+    try { localStorage.clear(); } catch {}
+    try { sessionStorage.clear(); } catch {}
+
+    hideDashboard();
+    switchMode('signin');
+    if($('#si-email')) $('#si-email').value = '';
+    if($('#si-pw')) $('#si-pw').value = '';
+
+    if(target){ target.disabled = false; target.textContent = originalLabel; }
+  }
+
+  // Wire the logout button.
+  $('#db-logout-btn').addEventListener('click', (e) => fullLogout(e.currentTarget));
+
+  // ── Restore dashboard on page refresh ──────────────
+  // If we have a cached profile + token, drop straight into the dashboard
+  // so a refresh doesn't kick the user back to the auth card.
+  function _restoreDashboard(){
+    const token = localStorage.getItem('century.access_token');
+    const raw   = localStorage.getItem('century.profile');
+    if(!token || !raw) return;
+    let profile;
+    try { profile = JSON.parse(raw); }
+    catch { localStorage.removeItem('century.profile'); return; }
+    try { showDashboardFromProfile(profile); }
+    catch(e){ console.error('[dashboard] restore failed', e); }
+  }
+  // Script is inline at end of <body>, so the DOM is parsed. Run immediately
+  // if document is already interactive/complete; otherwise wait for it.
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', _restoreDashboard);
+  } else {
+    _restoreDashboard();
   }
 
   async function showPlansScreen(email){
