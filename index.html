@@ -904,6 +904,145 @@
     .plan-card { padding: 24px; }
     .price-offer { font-size: 32px; }
   }
+
+  /* ─── LEGAL-FORM MODAL ─── */
+  .lf-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,23,42,0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 20px;
+    animation: lf-fade 0.25s ease both;
+  }
+  .lf-overlay[hidden] { display: none !important; }
+  @keyframes lf-fade { from { opacity: 0; } to { opacity: 1; } }
+
+  .lf-modal {
+    background: #ffffff;
+    width: 100%; max-width: 720px; max-height: calc(100vh - 40px);
+    border-radius: 18px;
+    display: flex; flex-direction: column;
+    box-shadow: 0 30px 60px -15px rgba(0,0,0,0.4);
+    overflow: hidden;
+    animation: lf-pop 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes lf-pop {
+    from { transform: translateY(20px) scale(0.96); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  .lf-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 22px 26px 18px;
+    border-bottom: 1px solid var(--border-color);
+    gap: 14px;
+  }
+  .lf-header h3 { font-size: 20px; font-weight: 600; margin: 0; color: var(--text-primary); }
+  .lf-sub { font-size: 13px; color: var(--text-secondary); margin: 4px 0 0; }
+  .lf-close {
+    background: none; border: none; font-size: 26px; line-height: 1;
+    color: var(--text-secondary); cursor: pointer; padding: 0 4px;
+    transition: color 0.2s;
+  }
+  .lf-close:hover { color: var(--text-primary); }
+
+  .lf-body {
+    padding: 18px 26px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .lf-section { margin-bottom: 22px; }
+  .lf-section h4 {
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text-secondary);
+    margin: 0 0 12px;
+  }
+  .lf-hint { color: var(--text-secondary); font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+  .lf-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px;
+  }
+  .lf-col-2 { grid-column: 1 / -1; }
+  .lf-grid label { display: flex; flex-direction: column; gap: 4px; }
+  .lf-grid label span {
+    font-size: 12px; color: var(--text-secondary); font-weight: 500;
+  }
+  .lf-grid input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: inherit; font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .lf-grid input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+  }
+
+  .lf-radio-group { display: flex; gap: 14px; flex-wrap: wrap; }
+  .lf-radio, .lf-checkbox {
+    display: inline-flex; align-items: center; gap: 8px;
+    cursor: pointer; font-size: 14px; color: var(--text-primary);
+  }
+  .lf-checkbox { display: flex; padding: 6px 0; }
+  .lf-checkbox input, .lf-radio input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+  .lf-notice {
+    display: none;
+    margin-top: 8px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(239,68,68,0.1);
+    color: var(--error);
+    border: 1px solid rgba(239,68,68,0.3);
+    font-size: 13px;
+  }
+  .lf-notice.show { display: block; }
+
+  .lf-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 26px;
+    border-top: 1px solid var(--border-color);
+    background: rgba(0,0,0,0.02);
+    gap: 14px; flex-wrap: wrap;
+  }
+  .lf-plan-info { font-size: 13px; color: var(--text-secondary); }
+  .lf-footer-actions { display: flex; gap: 10px; }
+
+  .lf-btn {
+    padding: 10px 18px; border-radius: 10px;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: all 0.2s;
+  }
+  .lf-btn-ghost {
+    background: var(--input-bg); color: var(--text-primary);
+    border: 1px solid var(--input-border);
+  }
+  .lf-btn-ghost:hover { border-color: var(--text-secondary); }
+  .lf-btn-primary { background: var(--accent); color: white; }
+  .lf-btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+  .lf-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .lf-spinner {
+    width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @media (max-width: 600px) {
+    .lf-grid { grid-template-columns: 1fr; }
+    .lf-body { padding: 16px 18px; }
+    .lf-header, .lf-footer { padding-left: 18px; padding-right: 18px; }
+  }
 </style>
 <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js" async defer></script>
 </head>
@@ -1437,6 +1576,107 @@
 
   <button type="button" class="db-logout-btn" id="db-logout-btn">Log out</button>
 </section>
+
+<!-- ─── LEGAL FORM MODAL (shown before /subscription/checkout) ─── -->
+<div class="lf-overlay" id="lf-overlay" hidden>
+  <div class="lf-modal" role="dialog" aria-modal="true" aria-labelledby="lf-title">
+    <header class="lf-header">
+      <div>
+        <h3 id="lf-title">Before you continue</h3>
+        <p class="lf-sub" id="lf-sub">A few details for the membership induction.</p>
+      </div>
+      <button type="button" class="lf-close" id="lf-close" aria-label="Close">&times;</button>
+    </header>
+
+    <form id="lf-form" class="lf-body" novalidate>
+      <!-- Who is playing -->
+      <section class="lf-section">
+        <h4>Who is playing?</h4>
+        <div class="lf-radio-group">
+          <label class="lf-radio">
+            <input type="radio" name="lf-who" value="individual" checked />
+            <span>Myself (adult)</span>
+          </label>
+          <label class="lf-radio">
+            <input type="radio" name="lf-who" value="minor" />
+            <span>A minor I'm signing for</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Purchaser -->
+      <section class="lf-section">
+        <h4>Purchaser</h4>
+        <div class="lf-grid">
+          <label><span>First name</span><input id="lf-p-first" type="text" required /></label>
+          <label><span>Last name</span><input id="lf-p-last" type="text" /></label>
+          <label><span>Date of birth</span><input id="lf-p-dob" type="date" required /></label>
+          <label><span>Email</span><input id="lf-p-email" type="email" required /></label>
+          <label><span>Phone</span><input id="lf-p-phone" type="tel" required /></label>
+          <label><span>Country code</span><input id="lf-p-country" type="text" maxlength="3" placeholder="US" value="US" required /></label>
+          <label class="lf-col-2"><span>Address</span><input id="lf-p-address" type="text" required /></label>
+        </div>
+      </section>
+
+      <!-- Emergency contact -->
+      <section class="lf-section">
+        <h4>Emergency contact</h4>
+        <div class="lf-grid">
+          <label><span>First name</span><input id="lf-e-first" type="text" required /></label>
+          <label><span>Last name</span><input id="lf-e-last" type="text" /></label>
+          <label><span>Phone</span><input id="lf-e-phone" type="tel" required /></label>
+          <label><span>Country code</span><input id="lf-e-country" type="text" maxlength="3" value="US" required /></label>
+        </div>
+      </section>
+
+      <!-- Minor-only sections -->
+      <section class="lf-section" id="lf-minor-sections" hidden>
+        <h4>Player <span class="lf-hint">(the minor)</span></h4>
+        <div class="lf-grid">
+          <label><span>First name</span><input id="lf-pl-first" type="text" /></label>
+          <label><span>Last name</span><input id="lf-pl-last" type="text" /></label>
+          <label class="lf-col-2"><span>Date of birth</span><input id="lf-pl-dob" type="date" /></label>
+        </div>
+
+        <h4 style="margin-top:18px">Guardian</h4>
+        <label class="lf-checkbox" style="margin-bottom:10px">
+          <input type="checkbox" id="lf-g-same" />
+          <span>Guardian same as purchaser</span>
+        </label>
+        <div class="lf-grid" id="lf-guardian-fields">
+          <label><span>First name</span><input id="lf-g-first" type="text" /></label>
+          <label><span>Last name</span><input id="lf-g-last" type="text" /></label>
+          <label><span>Date of birth</span><input id="lf-g-dob" type="date" /></label>
+          <label><span>Email</span><input id="lf-g-email" type="email" /></label>
+          <label><span>Phone</span><input id="lf-g-phone" type="tel" /></label>
+          <label><span>Country code</span><input id="lf-g-country" type="text" maxlength="3" value="US" /></label>
+        </div>
+      </section>
+
+      <!-- Agreements -->
+      <section class="lf-section">
+        <h4>Agreements</h4>
+        <label class="lf-checkbox"><input type="checkbox" id="lf-a-membership" required /><span>I agree to the membership agreement.</span></label>
+        <label class="lf-checkbox"><input type="checkbox" id="lf-a-waiver" required /><span>I agree to the waiver and release.</span></label>
+        <label class="lf-checkbox"><input type="checkbox" id="lf-a-terms" required /><span>I accept the terms &amp; conditions.</span></label>
+        <label class="lf-checkbox"><input type="checkbox" id="lf-a-privacy" required /><span>I accept the privacy policy.</span></label>
+      </section>
+
+      <div class="lf-notice" id="lf-notice"></div>
+    </form>
+
+    <footer class="lf-footer">
+      <span class="lf-plan-info" id="lf-plan-info"></span>
+      <div class="lf-footer-actions">
+        <button type="button" class="lf-btn lf-btn-ghost" id="lf-cancel">Cancel</button>
+        <button type="button" class="lf-btn lf-btn-primary" id="lf-confirm">
+          <span id="lf-confirm-label">Confirm &amp; pay</span>
+          <span class="lf-spinner" id="lf-spinner" hidden></span>
+        </button>
+      </div>
+    </footer>
+  </div>
+</div>
 
 <script>
   // ─── CONFIG ───────────────────────────────────────
@@ -2697,6 +2937,7 @@
   // ─── SUBSCRIPTION PLANS (post create-account) ─────
   const PLANS_BASE = 'https://century-web-egbjf6bfafa4akey.centralus-01.azurewebsites.net';
   const CHECKOUT_BASE = 'https://century-subscription-func-uat-fkapb0bphngbgnfb.centralindia-01.azurewebsites.net';
+  const PRELAUNCH_BASE = 'https://century-prelaunch-func-uat-gchde3hpg4eacva7.centralindia-01.azurewebsites.net';
   const PLANS_FUNCTION_KEY = 'feFatzX9zNem6XRSTK879dR_QsFsoZ0ppg_nDb1lE87eAzFu1q7_nA==';
   const FACILITY_CODE = 'HOU01';
 
@@ -2850,9 +3091,6 @@
     const plan = plansState.raw && plansState.raw.plans.find(p => p.id === planId);
     if(!plan) return;
 
-    const cycle = plansState.cycle;
-    const mappedBillingCycle = BILLING_CYCLE_MAP[cycle] || cycle;
-
     // Only the Family plan needs a member count; other plans send 0.
     let memberCount = 0;
     if(plan.id === 'family'){
@@ -2862,13 +3100,28 @@
     }
 
     const token = localStorage.getItem('century.access_token');
-
     if(!token){
       alert('Your session expired — please sign in again.');
       hidePlansScreen();
       switchMode('signin');
       return;
     }
+
+    // Open the legal-form modal. Checkout fires only after a successful
+    // /induction/legalform/submit (handled inside the modal Confirm flow).
+    openLegalForm({ plan, memberCount, sourceBtn: btn });
+  }
+
+  async function runCheckout(plan, memberCount, sourceBtn){
+    const token = localStorage.getItem('century.access_token');
+    if(!token){
+      alert('Your session expired — please sign in again.');
+      hidePlansScreen();
+      switchMode('signin');
+      return;
+    }
+    const cycle = plansState.cycle;
+    const mappedBillingCycle = BILLING_CYCLE_MAP[cycle] || cycle;
 
     const payload = {
       subscriptionCode: plan.id,
@@ -2879,7 +3132,7 @@
     };
     console.log('[checkout] request', payload);
 
-    // Lock all Buy now buttons while one is in flight.
+    const btn = sourceBtn || null;
     const allBtns = $$('[data-buy]');
     if(btn){ btn.classList.add('loading'); btn.disabled = true; }
     allBtns.forEach(b => { if(b !== btn) b.disabled = true; });
@@ -3301,6 +3554,233 @@
 
   window.addEventListener('resize', () => {
     if(document.body.classList.contains('plans-mode')) positionCyclePill();
+  });
+
+  // ─── LEGAL-FORM MODAL ─────────────────────────────
+  // Holds the plan/memberCount picked on the plans grid so the modal's
+  // Confirm handler can fire both the legal-form submit and the checkout.
+  const lfState = { plan: null, memberCount: 0, sourceBtn: null };
+
+  function _getProfileCached(){
+    try { return JSON.parse(localStorage.getItem('century.profile') || 'null'); }
+    catch { return null; }
+  }
+
+  function _prefillLegalForm(){
+    const profile = _getProfileCached() || {};
+    const pi = profile.personalInfo || {};
+    if(pi.firstName) $('#lf-p-first').value = pi.firstName;
+    if(pi.lastName)  $('#lf-p-last').value  = pi.lastName;
+    if(pi.email)     $('#lf-p-email').value = pi.email;
+    if(pi.phone)     $('#lf-p-phone').value = pi.phone;
+    if(pi.countryCode) $('#lf-p-country').value = pi.countryCode;
+    if(pi.dateOfBirth) $('#lf-p-dob').value = pi.dateOfBirth;
+    if(pi.location)  $('#lf-p-address').value = pi.location;
+  }
+
+  function openLegalForm({ plan, memberCount, sourceBtn }){
+    lfState.plan = plan;
+    lfState.memberCount = memberCount;
+    lfState.sourceBtn = sourceBtn || null;
+    _prefillLegalForm();
+    $('#lf-plan-info').textContent =
+      `${plan.name} · ${plansState.cycle === 'annual' ? 'Annually' : 'Every 2 weeks'}`;
+    $('#lf-notice').classList.remove('show'); $('#lf-notice').textContent = '';
+    $('#lf-overlay').removeAttribute('hidden');
+    // Reset agreements + radio default
+    document.querySelector('input[name="lf-who"][value="individual"]').checked = true;
+    $('#lf-minor-sections').setAttribute('hidden','');
+    $('#lf-g-same').checked = false;
+    $('#lf-guardian-fields').style.display = '';
+    ['#lf-a-membership','#lf-a-waiver','#lf-a-terms','#lf-a-privacy']
+      .forEach(id => { const el = $(id); if(el) el.checked = false; });
+  }
+  function closeLegalForm(){
+    $('#lf-overlay').setAttribute('hidden','');
+  }
+
+  // Show/hide minor sections based on who is playing
+  document.querySelectorAll('input[name="lf-who"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const isMinor = document.querySelector('input[name="lf-who"]:checked').value === 'minor';
+      $('#lf-minor-sections').toggleAttribute('hidden', !isMinor);
+    });
+  });
+
+  // Guardian-same-as-purchaser toggle
+  $('#lf-g-same').addEventListener('change', (e) => {
+    $('#lf-guardian-fields').style.display = e.target.checked ? 'none' : '';
+  });
+
+  // Close handlers
+  $('#lf-close').addEventListener('click', closeLegalForm);
+  $('#lf-cancel').addEventListener('click', closeLegalForm);
+  $('#lf-overlay').addEventListener('click', (e) => {
+    if(e.target === $('#lf-overlay')) closeLegalForm();
+  });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && !$('#lf-overlay').hasAttribute('hidden')) closeLegalForm();
+  });
+
+  function _val(sel){ const el = $(sel); return el ? el.value.trim() : ''; }
+  function _showLfError(msg){
+    const el = $('#lf-notice');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  function _buildLegalFormPayload(){
+    const isIndividual = document.querySelector('input[name="lf-who"]:checked').value === 'individual';
+    const guardianSame = $('#lf-g-same').checked;
+
+    const purchaser = {
+      firstName: _val('#lf-p-first'),
+      lastName: _val('#lf-p-last'),
+      dateOfBirth: _val('#lf-p-dob'),
+      email: _val('#lf-p-email'),
+      phoneNumber: _val('#lf-p-phone'),
+      countryCode: _val('#lf-p-country'),
+      address: _val('#lf-p-address'),
+    };
+    const emergencyContact = {
+      firstName: _val('#lf-e-first'),
+      lastName: _val('#lf-e-last'),
+      phoneNumber: _val('#lf-e-phone'),
+      countryCode: _val('#lf-e-country'),
+    };
+    const agreements = {
+      membershipAgreement: $('#lf-a-membership').checked,
+      waiverAndReleaseAgreement: $('#lf-a-waiver').checked,
+      termsAndConditions: $('#lf-a-terms').checked,
+      privacyPolicy: $('#lf-a-privacy').checked,
+    };
+
+    const players = [];
+    const guardians = [];
+    if(!isIndividual){
+      const pl = {
+        firstName: _val('#lf-pl-first'),
+        lastName: _val('#lf-pl-last'),
+        dateOfBirth: _val('#lf-pl-dob'),
+      };
+      if(pl.firstName || pl.lastName || pl.dateOfBirth) players.push(pl);
+
+      if(guardianSame){
+        guardians.push({
+          firstName: purchaser.firstName,
+          lastName: purchaser.lastName,
+          dateOfBirth: purchaser.dateOfBirth,
+          email: purchaser.email,
+          phoneNumber: purchaser.phoneNumber,
+          countryCode: purchaser.countryCode,
+        });
+      } else {
+        guardians.push({
+          firstName: _val('#lf-g-first'),
+          lastName: _val('#lf-g-last'),
+          dateOfBirth: _val('#lf-g-dob'),
+          email: _val('#lf-g-email'),
+          phoneNumber: _val('#lf-g-phone'),
+          countryCode: _val('#lf-g-country'),
+        });
+      }
+    }
+
+    return {
+      whoIsPlaying: { isIndividual },
+      purchaser,
+      emergencyContact,
+      agreements,
+      subscriptionCode: lfState.plan.id,
+      totalMembers: lfState.memberCount,
+      players,
+      guardians,
+      guardianSameAsPurchaser: guardianSame,
+    };
+  }
+
+  function _validateLegalForm(payload){
+    const p = payload.purchaser;
+    if(!p.firstName || !p.dateOfBirth || !p.email || !p.phoneNumber || !p.countryCode || !p.address){
+      return 'Please complete all required purchaser fields.';
+    }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)) return 'Please enter a valid purchaser email.';
+    const e = payload.emergencyContact;
+    if(!e.firstName || !e.phoneNumber || !e.countryCode){
+      return 'Please complete the emergency contact details.';
+    }
+    const a = payload.agreements;
+    if(!a.membershipAgreement || !a.waiverAndReleaseAgreement || !a.termsAndConditions || !a.privacyPolicy){
+      return 'Please accept all four agreements to continue.';
+    }
+    if(!payload.whoIsPlaying.isIndividual){
+      const pl = payload.players[0];
+      if(!pl || !pl.firstName || !pl.dateOfBirth){
+        return "Please enter the minor player's name and date of birth.";
+      }
+      const g = payload.guardians[0];
+      if(!g || !g.firstName || !g.phoneNumber){
+        return 'Please complete the guardian details (or tick "same as purchaser").';
+      }
+    }
+    return null;
+  }
+
+  async function submitLegalForm(payload){
+    const token = localStorage.getItem('century.access_token');
+    if(!token) throw new Error('Your session expired — please sign in again.');
+    const res = await fetch(`${PRELAUNCH_BASE}/induction/legalform/submit`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'x-functions-key': PLANS_FUNCTION_KEY,
+        'X-Request-Id': REQUEST_ID,
+      },
+      body: JSON.stringify(payload),
+    });
+    const body = await res.json().catch(() => null);
+    const ok = res.ok && body && (body.success === true || body.status === 'success');
+    if(!ok){
+      throw new Error((body && body.message) || `Legal form submit failed (${res.status}).`);
+    }
+    console.log('[legalform] success', body);
+    return body;
+  }
+
+  // Confirm → submit legal form → on success, run checkout.
+  $('#lf-confirm').addEventListener('click', async () => {
+    $('#lf-notice').classList.remove('show');
+
+    const payload = _buildLegalFormPayload();
+    const err = _validateLegalForm(payload);
+    if(err){ _showLfError(err); return; }
+
+    const confirmBtn = $('#lf-confirm');
+    const cancelBtn = $('#lf-cancel');
+    const label = $('#lf-confirm-label');
+    const spinner = $('#lf-spinner');
+    confirmBtn.disabled = true; cancelBtn.disabled = true;
+    label.textContent = 'Submitting…';
+    spinner.removeAttribute('hidden');
+
+    try {
+      await submitLegalForm(payload);
+      label.textContent = 'Starting checkout…';
+      const plan = lfState.plan;
+      const memberCount = lfState.memberCount;
+      const sourceBtn = lfState.sourceBtn;
+      closeLegalForm();
+      await runCheckout(plan, memberCount, sourceBtn);
+    } catch(e){
+      console.error('[legalform] error', e);
+      _showLfError(e.message || 'Could not submit the form.');
+    } finally {
+      confirmBtn.disabled = false; cancelBtn.disabled = false;
+      label.textContent = 'Confirm & pay';
+      spinner.setAttribute('hidden','');
+    }
   });
 
   // initial
