@@ -1613,32 +1613,20 @@
           <label><span>Date of birth</span><input id="lf-p-dob" type="date" required /></label>
           <label><span>Email</span><input id="lf-p-email" type="email" required /></label>
           <label><span>Phone</span><input id="lf-p-phone" type="tel" required /></label>
-          <label><span>Country code</span><input id="lf-p-country" type="text" maxlength="3" placeholder="US" value="US" required /></label>
+          <label><span>Country code</span><input id="lf-p-country" type="text" maxlength="4" placeholder="+91" value="+91" required /></label>
           <label class="lf-col-2"><span>Address</span><input id="lf-p-address" type="text" required /></label>
         </div>
       </section>
 
-      <!-- Emergency contact -->
-      <section class="lf-section">
-        <h4>Emergency contact</h4>
-        <div class="lf-grid">
-          <label><span>First name</span><input id="lf-e-first" type="text" required /></label>
-          <label><span>Last name</span><input id="lf-e-last" type="text" /></label>
-          <label><span>Phone</span><input id="lf-e-phone" type="tel" required /></label>
-          <label><span>Country code</span><input id="lf-e-country" type="text" maxlength="3" value="US" required /></label>
-        </div>
+      <!-- Players (rendered based on plan + who-is-playing + memberCount) -->
+      <section class="lf-section" id="lf-players-section" hidden>
+        <h4 id="lf-players-heading">Players <span class="lf-hint" id="lf-players-count"></span></h4>
+        <div id="lf-players-container"></div>
       </section>
 
-      <!-- Minor-only sections -->
-      <section class="lf-section" id="lf-minor-sections" hidden>
-        <h4>Player <span class="lf-hint">(the minor)</span></h4>
-        <div class="lf-grid">
-          <label><span>First name</span><input id="lf-pl-first" type="text" /></label>
-          <label><span>Last name</span><input id="lf-pl-last" type="text" /></label>
-          <label class="lf-col-2"><span>Date of birth</span><input id="lf-pl-dob" type="date" /></label>
-        </div>
-
-        <h4 style="margin-top:18px">Guardian</h4>
+      <!-- Guardian (shown only when there are players). -->
+      <section class="lf-section" id="lf-guardian-section" hidden>
+        <h4>Guardian</h4>
         <label class="lf-checkbox" style="margin-bottom:10px">
           <input type="checkbox" id="lf-g-same" />
           <span>Guardian same as purchaser</span>
@@ -1649,7 +1637,19 @@
           <label><span>Date of birth</span><input id="lf-g-dob" type="date" /></label>
           <label><span>Email</span><input id="lf-g-email" type="email" /></label>
           <label><span>Phone</span><input id="lf-g-phone" type="tel" /></label>
-          <label><span>Country code</span><input id="lf-g-country" type="text" maxlength="3" value="US" /></label>
+          <label><span>Country code</span><input id="lf-g-country" type="text" maxlength="4" value="+91" /></label>
+        </div>
+      </section>
+
+      <!-- Emergency contact -->
+      <section class="lf-section">
+        <h4>Emergency contact</h4>
+        <div class="lf-grid">
+          <label><span>First name</span><input id="lf-e-first" type="text" required /></label>
+          <label><span>Last name</span><input id="lf-e-last" type="text" /></label>
+          <label><span>Phone</span><input id="lf-e-phone" type="tel" required /></label>
+          <label><span>Country code</span><input id="lf-e-country" type="text" maxlength="4" value="+91" required /></label>
+          <label class="lf-col-2"><span>Relationship</span><input id="lf-e-relationship" type="text" placeholder="e.g. Spouse, Friend" /></label>
         </div>
       </section>
 
@@ -1735,6 +1735,7 @@
     const res = await fetch(AUTH_ENDPOINT, {
       method:'POST',
       headers,
+      credentials: 'include',
       body: JSON.stringify(payload),
     });
     let body = null;
@@ -3073,15 +3074,16 @@
 
   function askFamilyMembers(plan){
     // Prompts the buyer for how many additional family members to add.
-    // Backend treats this as the TOTAL extra members on top of the primary.
+    // Family plan supports a maximum of 3 additional members.
+    const MAX_FAMILY_MEMBERS = 3;
     const raw = window.prompt(
-      `How many additional family members for the "${plan.name}" plan?\n(Enter a number, e.g. 2)`,
+      `How many additional family members for the "${plan.name}" plan?\n(Enter a number from 1 to ${MAX_FAMILY_MEMBERS})`,
       '2'
     );
     if(raw === null) return null; // user cancelled
     const n = parseInt(raw, 10);
-    if(isNaN(n) || n < 0){
-      alert('Please enter a valid non-negative number.');
+    if(isNaN(n) || n < 1 || n > MAX_FAMILY_MEMBERS){
+      alert(`Please enter a number from 1 to ${MAX_FAMILY_MEMBERS}.`);
       return null;
     }
     return n;
@@ -3463,6 +3465,7 @@
           'Authorization': `Bearer ${token}`,
           'X-Request-Id': REQUEST_ID,
         },
+        credentials: 'include',
       });
       const body = await res.json().catch(() => null);
       if(!res.ok || !body || body.status !== 'success'){
@@ -3578,6 +3581,59 @@
     if(pi.location)  $('#lf-p-address').value = pi.location;
   }
 
+  // Slot count for the unified Players section per the request-body shape:
+  //   Individual           (non-family, isIndividual=true)  → 0
+  //   Someone Else         (non-family, isIndividual=false) → 1
+  //   Family You+N         (family,     isIndividual=true)  → memberCount
+  //   Family Others        (family,     isIndividual=false) → memberCount
+  function _playerSlotCount(plan, isIndividual, memberCount){
+    if(plan && plan.id === 'family') return memberCount || 0;
+    return isIndividual ? 0 : 1;
+  }
+
+  function _renderPlayers(){
+    const isIndividual = document.querySelector('input[name="lf-who"]:checked').value === 'individual';
+    const count = _playerSlotCount(lfState.plan, isIndividual, lfState.memberCount);
+    const playersSection = $('#lf-players-section');
+    const guardianSection = $('#lf-guardian-section');
+    const container = $('#lf-players-container');
+    const heading = $('#lf-players-heading');
+    container.innerHTML = '';
+
+    if(count <= 0){
+      playersSection.setAttribute('hidden','');
+      guardianSection.setAttribute('hidden','');
+      $('#lf-players-count').textContent = '';
+      return;
+    }
+
+    playersSection.removeAttribute('hidden');
+    guardianSection.removeAttribute('hidden');
+    $('#lf-players-count').textContent = `(${count})`;
+    // Heading + label change for the single-minor non-family case.
+    if(lfState.plan && lfState.plan.id !== 'family' && !isIndividual){
+      heading.firstChild.nodeValue = 'Player ';
+    } else {
+      heading.firstChild.nodeValue = 'Players ';
+    }
+
+    let html = '';
+    for(let i = 0; i < count; i++){
+      const sep = i > 0 ? 'margin-top:14px; padding-top:14px; border-top:1px dashed var(--border-color);' : '';
+      html += `
+        <div class="lf-player" data-player-idx="${i}" style="${sep}">
+          <div style="font-size:13px; font-weight:500; color:var(--text-secondary); margin-bottom:8px;">Player ${i + 1}</div>
+          <div class="lf-grid">
+            <label><span>First name</span><input class="lf-pl-first" type="text" required /></label>
+            <label><span>Last name</span><input class="lf-pl-last" type="text" /></label>
+            <label class="lf-col-2"><span>Date of birth</span><input class="lf-pl-dob" type="date" required /></label>
+          </div>
+        </div>
+      `;
+    }
+    container.innerHTML = html;
+  }
+
   function openLegalForm({ plan, memberCount, sourceBtn }){
     lfState.plan = plan;
     lfState.memberCount = memberCount;
@@ -3589,11 +3645,11 @@
     $('#lf-overlay').removeAttribute('hidden');
     // Reset agreements + radio default
     document.querySelector('input[name="lf-who"][value="individual"]').checked = true;
-    $('#lf-minor-sections').setAttribute('hidden','');
     $('#lf-g-same').checked = false;
     $('#lf-guardian-fields').style.display = '';
     ['#lf-a-membership','#lf-a-waiver','#lf-a-terms','#lf-a-privacy']
       .forEach(id => { const el = $(id); if(el) el.checked = false; });
+    _renderPlayers();
   }
   function closeLegalForm(){
     $('#lf-overlay').setAttribute('hidden','');
@@ -3602,8 +3658,9 @@
   // Show/hide minor sections based on who is playing
   document.querySelectorAll('input[name="lf-who"]').forEach(r => {
     r.addEventListener('change', () => {
-      const isMinor = document.querySelector('input[name="lf-who"]:checked').value === 'minor';
-      $('#lf-minor-sections').toggleAttribute('hidden', !isMinor);
+      // Re-render the players section since the slot count depends on
+      // (plan, isIndividual, memberCount).
+      _renderPlayers();
     });
   });
 
@@ -3632,6 +3689,7 @@
   function _buildLegalFormPayload(){
     const isIndividual = document.querySelector('input[name="lf-who"]:checked').value === 'individual';
     const guardianSame = $('#lf-g-same').checked;
+    const isFamily = lfState.plan && lfState.plan.id === 'family';
 
     const purchaser = {
       firstName: _val('#lf-p-first'),
@@ -3648,6 +3706,9 @@
       phoneNumber: _val('#lf-e-phone'),
       countryCode: _val('#lf-e-country'),
     };
+    const relationship = _val('#lf-e-relationship');
+    if(relationship) emergencyContact.relationship = relationship;
+
     const agreements = {
       membershipAgreement: $('#lf-a-membership').checked,
       waiverAndReleaseAgreement: $('#lf-a-waiver').checked,
@@ -3655,48 +3716,66 @@
       privacyPolicy: $('#lf-a-privacy').checked,
     };
 
+    // Collect player slots from the unified Players section.
     const players = [];
-    const guardians = [];
-    if(!isIndividual){
-      const pl = {
-        firstName: _val('#lf-pl-first'),
-        lastName: _val('#lf-pl-last'),
-        dateOfBirth: _val('#lf-pl-dob'),
-      };
-      if(pl.firstName || pl.lastName || pl.dateOfBirth) players.push(pl);
+    document.querySelectorAll('#lf-players-container .lf-player').forEach(node => {
+      const firstName = (node.querySelector('.lf-pl-first') || {}).value || '';
+      const lastName  = (node.querySelector('.lf-pl-last')  || {}).value || '';
+      const dob       = (node.querySelector('.lf-pl-dob')   || {}).value || '';
+      players.push({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        dateOfBirth: dob.trim(),
+      });
+    });
 
+    // totalMembers logic per the spec:
+    //   non-family                       → 0
+    //   family + isIndividual=true       → players.length + 1 (purchaser plays)
+    //   family + isIndividual=false      → players.length      (purchaser doesn't play)
+    let totalMembers = 0;
+    if(isFamily){
+      totalMembers = isIndividual ? (players.length + 1) : players.length;
+    }
+
+    const payload = {
+      whoIsPlaying: { isIndividual },
+      purchaser,
+      players,
+      emergencyContact,
+      agreements,
+      subscriptionCode: lfState.plan.id,
+      totalMembers,
+    };
+
+    // Guardian + guardianSameAsPurchaser are present ONLY when there are
+    // players (i.e. not the pure Individual scenario).
+    if(players.length > 0){
+      payload.guardianSameAsPurchaser = guardianSame;
+      let guardian;
       if(guardianSame){
-        guardians.push({
+        guardian = {
           firstName: purchaser.firstName,
           lastName: purchaser.lastName,
           dateOfBirth: purchaser.dateOfBirth,
           email: purchaser.email,
           phoneNumber: purchaser.phoneNumber,
           countryCode: purchaser.countryCode,
-        });
+        };
       } else {
-        guardians.push({
+        guardian = {
           firstName: _val('#lf-g-first'),
           lastName: _val('#lf-g-last'),
           dateOfBirth: _val('#lf-g-dob'),
           email: _val('#lf-g-email'),
           phoneNumber: _val('#lf-g-phone'),
           countryCode: _val('#lf-g-country'),
-        });
+        };
       }
+      payload.guardians = [guardian];
     }
 
-    return {
-      whoIsPlaying: { isIndividual },
-      purchaser,
-      emergencyContact,
-      agreements,
-      subscriptionCode: lfState.plan.id,
-      totalMembers: lfState.memberCount,
-      players,
-      guardians,
-      guardianSameAsPurchaser: guardianSame,
-    };
+    return payload;
   }
 
   function _validateLegalForm(payload){
@@ -3713,12 +3792,18 @@
     if(!a.membershipAgreement || !a.waiverAndReleaseAgreement || !a.termsAndConditions || !a.privacyPolicy){
       return 'Please accept all four agreements to continue.';
     }
-    if(!payload.whoIsPlaying.isIndividual){
-      const pl = payload.players[0];
-      if(!pl || !pl.firstName || !pl.dateOfBirth){
-        return "Please enter the minor player's name and date of birth.";
+
+    // Validate each player slot (firstName + DOB required).
+    for(let i = 0; i < payload.players.length; i++){
+      const pl = payload.players[i];
+      if(!pl.firstName || !pl.dateOfBirth){
+        return `Please enter the name and date of birth for player ${i + 1}.`;
       }
-      const g = payload.guardians[0];
+    }
+
+    // Guardian required only when players are present and not same-as-purchaser.
+    if(payload.players.length > 0 && payload.guardianSameAsPurchaser === false){
+      const g = (payload.guardians || [])[0];
       if(!g || !g.firstName || !g.phoneNumber){
         return 'Please complete the guardian details (or tick "same as purchaser").';
       }
