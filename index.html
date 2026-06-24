@@ -1599,7 +1599,7 @@
           </label>
           <label class="lf-radio">
             <input type="radio" name="lf-who" value="minor" />
-            <span>A minor I'm signing for</span>
+            <span>Someone else</span>
           </label>
         </div>
       </section>
@@ -3073,11 +3073,11 @@
   };
 
   function askFamilyMembers(plan){
-    // Prompts the buyer for how many additional family members to add.
-    // Family plan supports a maximum of 3 additional members.
+    // Total family members for this membership (purchaser counts as 1
+    // when "Myself" is selected). Family plan caps at 3 total.
     const MAX_FAMILY_MEMBERS = 3;
     const raw = window.prompt(
-      `How many additional family members for the "${plan.name}" plan?\n(Enter a number from 1 to ${MAX_FAMILY_MEMBERS})`,
+      `Total family members for the "${plan.name}" plan (including yourself if you play)?\n(Enter a number from 1 to ${MAX_FAMILY_MEMBERS})`,
       '2'
     );
     if(raw === null) return null; // user cancelled
@@ -3581,13 +3581,17 @@
     if(pi.location)  $('#lf-p-address').value = pi.location;
   }
 
-  // Slot count for the unified Players section per the request-body shape:
-  //   Individual           (non-family, isIndividual=true)  → 0
-  //   Someone Else         (non-family, isIndividual=false) → 1
-  //   Family You+N         (family,     isIndividual=true)  → memberCount
-  //   Family Others        (family,     isIndividual=false) → memberCount
+  // Slot count for the unified Players section. `memberCount` is the TOTAL
+  // family members (purchaser counts as 1 when Myself is selected):
+  //   Individual         (non-family, isIndividual=true)  → 0
+  //   Someone Else       (non-family, isIndividual=false) → 1
+  //   Family + Myself    (family,     isIndividual=true)  → memberCount - 1
+  //   Family + Minor     (family,     isIndividual=false) → memberCount
   function _playerSlotCount(plan, isIndividual, memberCount){
-    if(plan && plan.id === 'family') return memberCount || 0;
+    if(plan && plan.id === 'family'){
+      const total = memberCount || 0;
+      return isIndividual ? Math.max(0, total - 1) : total;
+    }
     return isIndividual ? 0 : 1;
   }
 
@@ -3729,13 +3733,13 @@
       });
     });
 
-    // totalMembers logic per the spec:
-    //   non-family                       → 0
-    //   family + isIndividual=true       → players.length + 1 (purchaser plays)
-    //   family + isIndividual=false      → players.length      (purchaser doesn't play)
+    // totalMembers reflects the family-count entered up-front (purchaser
+    // counts as 1 when "Myself" is selected):
+    //   non-family                  → 0
+    //   family                      → memberCount (the value from the prompt)
     let totalMembers = 0;
     if(isFamily){
-      totalMembers = isIndividual ? (players.length + 1) : players.length;
+      totalMembers = lfState.memberCount || 0;
     }
 
     const payload = {
