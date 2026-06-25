@@ -1725,18 +1725,22 @@
     else { field.classList.remove('error'); err.textContent = ''; }
   }
 
-  async function callAuth(payload, { bearer } = {}){
+  // Each auth action is now its own path under /auth/<action>.
+  //   callAuth('signin', { type:'jwt', email, password })
+  //   callAuth('signout', {}, { bearer: token })
+  // Refresh-token cookie roundtrips because of credentials:'include'.
+  async function callAuth(action, payload, { bearer } = {}){
     const headers = {
       'Content-Type':'application/json',
       'Accept':'application/json',
       'X-Request-Id': REQUEST_ID,
     };
     if(bearer) headers['Authorization'] = `Bearer ${bearer}`;
-    const res = await fetch(AUTH_ENDPOINT, {
+    const res = await fetch(`${BASE_URL}/auth/${action}`, {
       method:'POST',
       headers,
       credentials: 'include',
-      body: JSON.stringify(payload),
+      body: JSON.stringify(payload || {}),
     });
     let body = null;
     try { body = await res.json(); } catch { /* non-json */ }
@@ -1890,12 +1894,11 @@
 
     setBtnLoading(btn, true);
     try {
-      const res = await callAuth({
-        action: 'signin',
+      const res = await callAuth('signin', {
         type: 'jwt',
         email: emailEl.value.trim(),
         password: pwEl.value,
-        // deviceType: detectDeviceType(),
+        facilityCode: 'HOU01',
         deviceInfo: buildDeviceInfo(),
       });
       saveSession(res && res.data);
@@ -1903,10 +1906,10 @@
       const userStatus = res && res.data && res.data.status;
       const profile = res && res.data && res.data.profile;
       console.log('[signin] routing', { userStatus, hasProfile: !!profile });
-      // The user is signed in either way — go straight to the dashboard.
-      // The membership CTA in the dashboard handles the "no key linked"
-      // nudge for status 0 + hasMembershipKey === false.
-      if(userStatus === 0 || userStatus === 1){
+      // status: 0 inactive, 1 active, 3 limit reached.
+      if(userStatus === 3){
+        showNotice(notice, res.message || 'Account limit reached. Please contact support.');
+      } else if(userStatus === 0 || userStatus === 1){
         showNotice(notice, res.message || 'Signed in successfully.', 'success');
         setTimeout(() => {
           try { showDashboardFromProfile(profile); }
@@ -1940,8 +1943,7 @@
 
     setBtnLoading(btn, true);
     try {
-      await callAuth({
-        action:'requestVerification',
+      await callAuth('requestVerification', {
         type:'jwt',
         email,
       });
@@ -2031,7 +2033,7 @@
     const notice = $('#su-notice-2');
     btn.disabled = true;
     try {
-      await callAuth({ action:'requestVerification', type:'jwt', email: state.email });
+      await callAuth('requestVerification', { type:'jwt', email: state.email });
       showNotice(notice, 'A fresh code has been sent.', 'success');
       otpInputs.forEach(i => { i.value=''; });
       updateOtpState();
@@ -2058,8 +2060,7 @@
     }
     setBtnLoading(btn, true);
     try {
-      await callAuth({
-        action:'verifyEmail',
+      await callAuth('verifyEmail', {
         type:'jwt',
         email: state.email,
         code,
@@ -2119,8 +2120,7 @@
 
     setBtnLoading(btn, true);
     try {
-      const data = await callAuth({
-        action:'signup',
+      const data = await callAuth('signup', {
         type:'jwt',
         firstName: name,
         email: state.email,
@@ -2128,7 +2128,6 @@
         passwordConfirmation: pw2El.value,
         captchaToken:'test-captcha',
         facilityCode: 'HOU01',
-        deviceType: detectDeviceType(),
         deviceInfo: buildDeviceInfo(),
       });
       showNotice(notice, data.message || 'Account created. Please sign in.', 'success');
@@ -2272,13 +2271,12 @@
     if(googleBtn) setSocialLoading(googleBtn, true);
 
     try {
-      const res = await callAuth({
-        action: 'googleSignin',        // TODO: confirm with backend
+      const res = await callAuth('googleSignin', {
         type: 'google',
+        nonce: saved.nonce,
         code,
         codeVerifier: saved.codeVerifier,
         redirectUri: saved.redirectUri,
-        nonce: saved.nonce,
         deviceType: detectDeviceType(),
         deviceInfo: buildDeviceInfo(),
       });
@@ -2360,14 +2358,17 @@
     // authData.authorization.id_token is the Apple ID token (JWT)
     const noticeEl = getActiveNotice();
     try {
-      const data = await callAuth({
-        action: 'appleSignIn',                          // TODO: confirm action name with backend
-        type: 'jwt',
-        credential: authData.authorization.id_token,    // Apple ID token (JWT)
-        authorizationCode: authData.authorization.code, // short-lived auth code
+      // Apple returns `user` only on the very first sign-in (name + email).
+      // Omit the field entirely on returning sign-ins.
+      const applePayload = {
+        type: 'apple',
         nonce: appleConfig && appleConfig.nonce,
-        user: authData.user || null,                    // present only on first sign-in
-      });
+        idToken: authData.authorization.id_token,
+        deviceType: detectDeviceType(),
+        deviceInfo: buildDeviceInfo(),
+      };
+      if(authData.user) applePayload.user = authData.user;
+      const data = await callAuth('appleSignin', applePayload);
       if(typeof saveSession === 'function') saveSession(data && data.data);
       showNotice(noticeEl, data.message || 'Signed in with Apple.', 'success');
       console.log('[apple] success', data && data.data);
@@ -2451,8 +2452,8 @@
 
   // ─── FORGOT PASSWORD / RESET PASSWORD ─────────────
   // Two-step flow:
-  //   step 1 → POST /auth { action:'forgotPassword', email }
-  //   step 2 → POST /auth { action:'resetPassword',  email, resetCode, newPassword }
+  //   step 1 → POST /auth/forgotPassword { type:'jwt', email }
+  //   step 2 → POST /auth/resetPassword  { type:'jwt', email, resetCode, newPassword }
   const fpState = {
     email: '',
     step: 1,
@@ -2575,7 +2576,7 @@
     const notice = $('#fp-notice-2');
     btn.disabled = true;
     try {
-      await callAuth({ action:'forgotPassword', type:'jwt', email: fpState.email });
+      await callAuth('forgotPassword', { type:'jwt', email: fpState.email });
       showNotice(notice, 'A fresh reset code has been sent.', 'success');
       fpOtpInputs.forEach(i => { i.value=''; });
       updateFpSubmit();
@@ -2611,8 +2612,7 @@
 
     setBtnLoading(btn, true);
     try {
-      const res = await callAuth({
-        action: 'forgotPassword',
+      const res = await callAuth('forgotPassword', {
         type: 'jwt',
         email,
       });
@@ -2659,8 +2659,7 @@
 
     setBtnLoading(btn, true);
     try {
-      const res = await callAuth({
-        action: 'resetPassword',
+      const res = await callAuth('resetPassword', {
         type: 'jwt',
         email: fpState.email,
         resetCode: code,
@@ -2687,10 +2686,10 @@
 
 
   // ─── MEMBERSHIP KEY (post sign-in, when data.status === 0) ─────
-  // Uses the same /auth endpoint with action: 'verifyMembershipKey',
+  // Uses POST /auth/verifyMembershipKey + /auth/verifyMembership,
   // authenticated with the access_token as a Bearer token.
-  // Step 1 → POST /auth { action:'verifyMembershipKey', membershipKey } (sends OTP)
-  // Step 2 → POST /auth { action:'verifyMembership',    membershipKey, otp }
+  // Step 1 → POST /auth/verifyMembershipKey { membershipKey } (sends OTP)
+  // Step 2 → POST /auth/verifyMembership    { membershipKey, otp }
   // Both calls authenticated with Bearer <access_token>.
   const mkState = {
     key: '',
@@ -2834,7 +2833,8 @@
     btn.disabled = true;
     try {
       await callAuth(
-        { action: 'verifyMembershipKey', membershipKey: mkState.key },
+        'verifyMembershipKey',
+        { membershipKey: mkState.key },
         { bearer: token }
       );
       showNotice(notice, 'A fresh code has been sent.', 'success');
@@ -2872,7 +2872,8 @@
     setBtnLoading(btn, true);
     try {
       const res = await callAuth(
-        { action: 'verifyMembershipKey', membershipKey: key },
+        'verifyMembershipKey',
+        { membershipKey: key },
         { bearer: token }
       );
       console.log('[membership:step1] ok', res && res.data);
@@ -2913,21 +2914,34 @@
     setBtnLoading(btn, true);
     try {
       const res = await callAuth(
-        { action: 'verifyMembership', membershipKey: mkState.key, otp },
+        'verifyMembership',
+        { membershipKey: mkState.key, otp },
         { bearer: token }
       );
       console.log('[membership:step2] ok', res && res.data);
-      localStorage.setItem('century.status', '1');
-
       const data = res && res.data || {};
-      let msg = res.message || 'Membership verified.';
+      // changed:true → backend returns updated status + profile; refresh
+      // dashboard from it. changed:false → same email/family, no profile.
       if(data.changed){
+        if(typeof data.status !== 'undefined'){
+          localStorage.setItem('century.status', String(data.status));
+        }
+        if(data.profile){
+          try { localStorage.setItem('century.profile', JSON.stringify(data.profile)); } catch {}
+        }
         const n = data.transferEmailCount;
-        msg = `Email updated.${n ? ` ${n} record${n === 1 ? '' : 's'} transferred.` : ''}`;
+        const msg = `Email updated.${n ? ` ${n} record${n === 1 ? '' : 's'} transferred.` : ''}`;
+        showNotice(notice, msg, 'success');
+        clearInterval(mkState.timer);
+        if(data.profile){
+          setTimeout(() => {
+            try { showDashboardFromProfile(data.profile); } catch(e){ console.error('[dashboard] render failed', e); }
+          }, 800);
+        }
+      } else {
+        showNotice(notice, res.message || 'Membership verified.', 'success');
+        clearInterval(mkState.timer);
       }
-      showNotice(notice, msg, 'success');
-      clearInterval(mkState.timer);
-      // TODO: redirect to the authenticated area when ready
     } catch(err2){
       showNotice(notice, err2.message || 'Could not verify the code.');
     } finally {
@@ -3418,7 +3432,7 @@
 
     if(token){
       try {
-        const res = await callAuth({ action: 'signout' }, { bearer: token });
+        const res = await callAuth('signout', {}, { bearer: token });
         console.log('[signout] success', res);
       } catch(err){
         // Network error / already-revoked / expired — log but proceed.
@@ -3442,17 +3456,12 @@
   $('#db-logout-btn').addEventListener('click', (e) => fullLogout(e.currentTarget));
 
   // ── Dashboard refresh button ──────────────────────
-  // POST ${BASE_URL}/refresh with the stored access token as a Bearer header
-  // (no body). On success, swap in the new token + re-render the dashboard.
+  // POST ${BASE_URL}/refresh — refresh_token is read from the HttpOnly
+  // cookie, so no Authorization header is sent. credentials:'include'
+  // makes the browser round-trip the cookie.
   async function refreshDashboard(){
     const btn = $('#db-refresh-btn');
     const label = $('#db-refresh-label');
-    const token = localStorage.getItem('century.access_token');
-    if(!token){
-      alert('Your session expired — please sign in again.');
-      fullLogout();
-      return;
-    }
     btn.disabled = true;
     btn.classList.add('spinning');
     const originalLabel = label.textContent;
@@ -3462,10 +3471,11 @@
         method: 'POST',
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
           'X-Request-Id': REQUEST_ID,
         },
         credentials: 'include',
+        body: JSON.stringify({}),
       });
       const body = await res.json().catch(() => null);
       if(!res.ok || !body || body.status !== 'success'){
